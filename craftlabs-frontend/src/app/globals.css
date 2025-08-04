@@ -1,0 +1,27 @@
+/* src/app/globals.css */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-bg-primary text-text-primary;
+    overflow-x: hidden;
+  }
+
+  /* Custom Scrollbar to match the theme */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: theme('colors.bg-secondary');
+  }
+  ::-webkit-scrollbar-thumb {
+    background: theme('colors.neon-primary');
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: theme('colors.neon-primary-glow');
+  }
+}
