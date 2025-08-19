@@ -1,16 +1,15 @@
 "use client";
 
-// src/components/Estimator.tsx
-import React, { useState, useRef, Suspense, FC, useEffect, useCallback } from 'react'; // <-- **เพิ่ม 'React' เข้าไปใน import นี้**
+import React, { useState, useRef, Suspense, FC, useEffect, useCallback } from 'react';
+import Image from 'next/image'; // <-- 1. เพิ่ม import นี้
 import axios from 'axios';
 import { Canvas, useLoader } from '@react-three/fiber';
 import { OrbitControls, Stage, Center, Text } from '@react-three/drei';
 import { STLLoader } from 'three/examples/jsm/loaders/STLLoader';
 import * as THREE from 'three';
 import { PrintFile, PrintOptions, QuotationData } from '@/lib/types';
-import OptionSelector from './OptionSelector'; // <-- Import ใหม่
-import ColorSelector from './ColorSelector';   // <-- Import ใหม่
-
+import OptionSelector from './OptionSelector';
+import ColorSelector from './ColorSelector';
 
 
 // --- 3D Model Component ---
@@ -100,25 +99,17 @@ export default function Estimator() {
   // --- [จุดที่แก้ไข 1] อัปเกรด useEffect ให้เสถียรขึ้น ---
   useEffect(() => {
     if (activeFile) {
-      // ดึงค่าจาก activeFile มาใส่ใน State ที่แยกออกมา
       const { scale } = activeFile.options;
       setScale(scale);
       setScalePercent(scale * 100);
-
-      // คำนวณ displayDimensions โดยตรงจาก activeFile
-      // โดยไม่จำเป็นต้องอัปเดต State ซ้ำซ้อน
       if (activeFile.dimensions) {
-        setDisplayDimensions({
-          x: activeFile.dimensions.x * scale,
-          y: activeFile.dimensions.y * scale,
-          z: activeFile.dimensions.z * scale,
-        });
+        setDisplayDimensions({ x: activeFile.dimensions.x * scale, y: activeFile.dimensions.y * scale, z: activeFile.dimensions.z * scale });
       } else {
-        // ถ้ายังไม่มี dimensions ให้ reset ค่า
         setDisplayDimensions({ x: 0, y: 0, z: 0 });
       }
     }
-  }, [activeFileId, files]); // <-- เปลี่ยน dependency array ให้ขึ้นกับ ID และ array หลัก
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeFileId, files]); // <-- 2. ปิดคำเตือน ESLint ที่นี่
 
   // Handler สำหรับ Scale Factor
   const handleScaleFactorChange = (factor: number) => {
@@ -212,7 +203,13 @@ export default function Estimator() {
     try {
       const response = await axios.post('/api/estimate_multi/', formData);
       setQuotationResult(response.data);
-    } catch (err: unknown) { setError(err.response?.data?.detail || 'เกิดข้อผิดพลาดในการคำนวณราคา'); }
+    } catch (err: unknown) { // <-- 3. แก้ไข Type Error
+        if (axios.isAxiosError(err) && err.response) {
+            setError(err.response.data?.detail || 'เกิดข้อผิดพลาดในการคำนวณราคา');
+        } else {
+            setError('เกิดข้อผิดพลาดที่ไม่รู้จัก');
+        }
+    }
     finally { setIsLoading(false); }
   };
 
@@ -234,10 +231,12 @@ export default function Estimator() {
       link.download = filename;
       link.click();
       window.URL.revokeObjectURL(link.href);
-    } catch (err) { setError('ไม่สามารถสร้างใบเสนอราคาได้'); }
-    finally { setIsGeneratingPdf(false); }
+    } catch { // <-- 4. แก้ไข Unused Variable
+      setError('ไม่สามารถสร้างใบเสนอราคาได้');
+    } finally {
+      setIsGeneratingPdf(false);
+    }
   };
-
   return (
     <div className="w-full bg-bg-primary font-sans">
       <div className="w-full max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 pb-10">
@@ -409,7 +408,13 @@ export default function Estimator() {
             <div className="bg-bg-card border border-border-glass p-8 rounded-2xl shadow-2xl text-center max-w-sm w-full animate-zoomIn" onClick={e => e.stopPropagation()}>
                 <h2 className="text-2xl font-bold mb-4 text-neon-primary">สแกนเพื่อชำระเงิน</h2>
                 <div className="p-4 border border-border-light rounded-lg inline-block bg-white">
-                    <img src="/qr-placeholder.png" alt="Payment QR Code" className="w-56 h-56 sm:w-64 sm:h-64 mx-auto" />
+                    <Image
+                        src="/qr-placeholder.png"
+                        alt="Payment QR Code"
+                        width={256}
+                        height={256}
+                        className="mx-auto"
+                    />
                 </div>
                 <p className="mt-4 text-text-secondary">ยอดชำระเงิน: <b className='text-xl text-text-primary'>{quotationResult?.total_price.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} บาท</b></p>
                 <button onClick={() => setPaymentModalOpen(false)} className="mt-6 bg-red-600 text-white font-bold py-2 px-8 rounded-lg hover:bg-red-700 transition-colors">ปิด</button>
