@@ -4,8 +4,9 @@ import React, { useState, useRef, Suspense, FC, useEffect, useCallback } from 'r
 import Image from 'next/image'; // <-- 1. เพิ่ม import นี้
 import axios from 'axios';
 import { Canvas, useLoader } from '@react-three/fiber';
-import { OrbitControls, Stage, Center, Text } from '@react-three/drei';
-import { STLLoader } from 'three/examples/jsm/loaders/STLLoader';
+import { OrbitControls, Stage, Center, Text, ContactShadows } from '@react-three/drei';
+
+import { STLLoader } from 'three-stdlib'; 
 import * as THREE from 'three';
 import { PrintFile, PrintOptions, QuotationData } from '@/lib/types';
 import OptionSelector from './OptionSelector';
@@ -246,11 +247,8 @@ export default function Estimator() {
              <div className="absolute top-4 left-4 z-10 bg-bg-card backdrop-blur-sm border border-border-glass rounded-full px-4 py-1 text-sm text-text-secondary">3D Model Viewer</div>
             <Canvas shadows camera={{ position: [0, 0, 150], fov: 50 }}>
               <Suspense fallback={null}>
-                <Stage environment="city" intensity={0.6} contactShadow={{ opacity: 0.5, blur: 2 }} preset="rembrandt" adjustCamera={1.2}>
-                  
-                  {/* --- [จุดที่แก้ไข 2] เปลี่ยน onDimensionsLoad ให้เรียกใช้ฟังก์ชันใหม่ --- */}
+                <Stage environment="city" intensity={0.6} preset="rembrandt" adjustCamera={1.2}>
                   {activeFile ? <Model fileUrl={activeFile.fileUrl} scale={activeFile.options.scale} onDimensionsLoad={(dim) => updateFileDimensions(activeFile.id, dim)} /> : <Center><Text color="#777" fontSize={5} textAlign='center'>{`เลือกไฟล์เพื่อแสดงผล`}</Text></Center>}
-
                 </Stage>
               </Suspense>
               <OrbitControls makeDefault minDistance={50} maxDistance={500} enablePan={false} />
