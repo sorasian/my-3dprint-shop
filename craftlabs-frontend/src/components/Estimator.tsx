@@ -209,7 +209,7 @@ export default function Estimator() {
     files.forEach(pf => formData.append('files', pf.file));
     formData.append('options_json', JSON.stringify(allOptions));
     try {
-      const response = await axios.post('http://127.0.0.1:8000/estimate_multi/', formData);
+      const response = await axios.post('/api/estimate_multi/', formData);
       setQuotationResult(response.data);
     } catch (err: any) { setError(err.response?.data?.detail || 'เกิดข้อผิดพลาดในการคำนวณราคา'); }
     finally { setIsLoading(false); }
@@ -220,7 +220,7 @@ export default function Estimator() {
     if (!quotationResult) return;
     setIsGeneratingPdf(true);
     try {
-      const response = await axios.post('http://127.0.0.1:8000/generate_quotation_multi/', quotationResult, { responseType: 'blob' });
+      const response = await axios.post('/api/generate_quotation_multi/', quotationResult, { responseType: 'blob' });
       const blob = new Blob([response.data], { type: 'application/pdf' });
       const link = document.createElement('a');
       link.href = window.URL.createObjectURL(blob);
