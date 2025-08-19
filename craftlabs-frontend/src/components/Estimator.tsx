@@ -212,7 +212,7 @@ export default function Estimator() {
     try {
       const response = await axios.post('/api/estimate_multi/', formData);
       setQuotationResult(response.data);
-    } catch (err: any) { setError(err.response?.data?.detail || 'เกิดข้อผิดพลาดในการคำนวณราคา'); }
+    } catch (err: unknown) { setError(err.response?.data?.detail || 'เกิดข้อผิดพลาดในการคำนวณราคา'); }
     finally { setIsLoading(false); }
   };
 
