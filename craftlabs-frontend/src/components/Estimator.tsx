@@ -1,3 +1,5 @@
+"use client";
+
 // src/components/Estimator.tsx
 import React, { useState, useRef, Suspense, FC, useEffect, useCallback } from 'react'; // <-- **เพิ่ม 'React' เข้าไปใน import นี้**
 import axios from 'axios';
@@ -9,7 +11,6 @@ import { PrintFile, PrintOptions, QuotationData } from '@/lib/types';
 import OptionSelector from './OptionSelector'; // <-- Import ใหม่
 import ColorSelector from './ColorSelector';   // <-- Import ใหม่
 
-"use client";
 
 
 // --- 3D Model Component ---
